@@ -24,12 +24,17 @@ export default {
     createRandomPlayer() {
       var id = ++this.max_id + 1;
       var randomName = this.$faker().name.firstName();
+      var x = this.getRandomInt(500);
+      var y = this.getRandomInt(500);
 
-      return {"id": id, "name": randomName};
+      return {"id": id, "name": randomName, "x": x, "y": y};
     },
     addRandomPlayer(){
       var randomPlayer = this.createRandomPlayer();
       this.players.push(randomPlayer);
+    },
+    getRandomInt(max) {
+      return Math.floor(Math.random() * max);
     }
   }
 }
