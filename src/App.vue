@@ -1,28 +1,25 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <MainPlatform :players="players"/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import MainPlatform from './components/MainPlatform.vue'
 
 export default {
   name: 'App',
+  data: function() {
+    return {
+      players: [{"id": 0}, {"id": 1}, {"id": 2}, {"id": 3}]
+    };
+  },
   components: {
-    HelloWorld
+    MainPlatform
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>
