@@ -1,5 +1,7 @@
 <template>
   <div id="app">
+    <button @click="addRandomPlayer">Create</button>
+    
     <MainPlatform :players="players"/>
   </div>
 </template>
@@ -11,11 +13,24 @@ export default {
   name: 'App',
   data: function() {
     return {
-      players: [{"id": 0}, {"id": 1}, {"id": 2}, {"id": 3}]
+      max_id: 0,
+      players: []
     };
   },
   components: {
     MainPlatform
+  },
+  methods: {
+    createRandomPlayer() {
+      var id = ++this.max_id + 1;
+      var randomName = this.$faker().name.firstName();
+
+      return {"id": id, "name": randomName};
+    },
+    addRandomPlayer(){
+      var randomPlayer = this.createRandomPlayer();
+      this.players.push(randomPlayer);
+    }
   }
 }
 </script>
