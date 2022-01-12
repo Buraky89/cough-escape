@@ -37,7 +37,7 @@ export default {
     moveSinglePlayer(index){
       var singlePlayer = this.players[index];
       singlePlayer.x = singlePlayer.nextX;
-      singlePlayer.x = singlePlayer.nextY;
+      singlePlayer.y = singlePlayer.nextY;
       
       var nextX = this.getRandomInt(500);
       var nextY = this.getRandomInt(500);
