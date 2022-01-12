@@ -39,6 +39,7 @@ export default {
       return "00000".substring(0, 6 - c.length) + c;
     },
     getPlayerBackgroundColor(str) {
+      if(this.player.isMe) return "#ff0000";
       return "#" + this.intToRGB(this.hashCode(str));
     },
     pickTextColorBasedOnBgColorSimple(bgColor) {
