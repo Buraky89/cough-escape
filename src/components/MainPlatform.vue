@@ -1,8 +1,8 @@
 <template>
   <div>
     <ul style="position: absolute;">
-      <Player v-for="p in players" :key="p.id" :player="p"></Player>
-      <Player v-if="me.x" :key="-1" :player="me"></Player>
+      <Player v-for="p in players" :key="p.id" :time="time" :id="p.id"></Player>
+      <Player :id="-1" :key="-1" :time="time" :forcedX="forcedX" :forcedY="forcedY"></Player>
     </ul>
   </div>
 </template>
@@ -12,7 +12,7 @@ import Player from './Player.vue';
 
 export default {
   name: 'MainPlatform',
-  props: ['players', 'me'],
+  props: ['players', 'forcedX', 'forcedY', 'time'],
   components: {
     Player
   }

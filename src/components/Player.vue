@@ -1,21 +1,90 @@
 <template>
-  <div class="player" :key="player.id" :style="getPlayerStyle">{{ getPlayerShortName }}</div>
+  <div class="player" :key="id" :style="getPlayerStyle">{{ getPlayerShortName }}</div>
 </template>
 
 <script>
 export default {
   name: 'Player',
-  props: ['player'],
+  props: ['player', 'time', 'forcedX', 'forcedY', 'id'],
+  data: function(){
+    var p = this.initiatePlayer();
+    console.log(p);
+    return {
+      name: p.isMe ? "You" : p.name,
+      x: p.x,
+      y: p.y,
+      autoX: p.autoX,
+      autoY: p.autoY,
+      isMe: p.isMe
+    };
+  },
   computed: {
     getPlayerStyle() {
-      return "position: absolute; top: " + this.getReadableLocationUnit(this.player.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.player.x.toString()) + "px; background-color: " + this.getPlayerBackgroundColor(this.player.name) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColor(this.player.name)) + ";";
+      // eslint-disable-next-line no-unused-vars
+      var zeit = this.time;
+
+      var ourMan = this;
+
+
+      var targetX = this.forcedX ? this.forcedX : this.autoX;
+      var targetY = this.forcedY ? this.forcedY : this.autoY;
+
+      var yMovementDirection = Math.sign(targetY - ourMan.y);
+      var xMovementDirection = Math.sign(targetX - ourMan.x);
+      var speed = 1;
+
+      var alpha = Math.atan(Math.abs((targetX - ourMan.x) / (targetY - ourMan.y)));
+      var yDifference = speed * yMovementDirection * Math.cos(alpha);
+      var xDifference = speed * xMovementDirection * Math.sin(alpha);
+
+      ourMan.x = ourMan.x + xDifference;
+      ourMan.y = ourMan.y + yDifference;
+
+      var howClose = Math.sqrt(Math.pow(ourMan.x - targetX, 2) + Math.pow(ourMan.y - targetY, 2));
+      var playerIsCloseEnoughToTarget = howClose < 4;
+
+      if(playerIsCloseEnoughToTarget && !ourMan.isMe){
+        var nextLocation = this.decideNextLocation(ourMan.x, ourMan.y);
+        var autoX = nextLocation.x;
+        var autoY = nextLocation.y;
+
+        ourMan.autoX = autoX;
+        ourMan.autoY = autoY;
+      }
+
+      return "position: absolute; top: " + this.getReadableLocationUnit(this.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.x.toString()) + "px; background-color: " + this.getPlayerBackgroundColor(this.name) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColor(this.name)) + ";";
     },
-    
     getPlayerShortName() {
-      return this.player.name.substring(0, 3);
+      return this.name.substring(0, 3);
     }
   },
   methods: {
+    initiatePlayer() {
+      var randomName = this.$faker().name.firstName();
+      var x = this.getRandomInt(500);
+      var y = this.getRandomInt(500);
+
+      var nextLocation = this.decideNextLocation(x, y);
+      var autoX = nextLocation.x;
+      var autoY = nextLocation.y;
+
+      return {"name": randomName, "x": x, "y": y, "autoX": autoX, "autoY": autoY, "isMe": this.id == -1};
+    },
+    decideNextLocation(x, y){
+      var newPoint = this.generateRandomPoint(x, y, 100);
+      while(newPoint.x < 0 || newPoint.x >= 500 ||newPoint.y < 0 || newPoint.y >= 500){
+        console.log("randoming again...");
+        newPoint = this.generateRandomPoint(x, y, 100);
+      }
+      return {x: newPoint.x, y: newPoint.y};
+    },
+    generateRandomPoint(x, y, distance) {
+        var alpha = this.getRandomInt(360);
+        return {"x": (x + distance * Math.cos(alpha)), "y": (y + distance * Math.sin(alpha))}
+    },
+    getRandomInt(max) {
+      return Math.floor(Math.random() * max);
+    },
     getReadableLocationUnit(u){
       if(u.toString().indexOf(".") > 0){
         return u.toString().substring(0, u.indexOf("."));
@@ -39,9 +108,10 @@ export default {
       return "00000".substring(0, 6 - c.length) + c;
     },
     getPlayerBackgroundColor(str) {
-      if(this.player.isMe) return "#ff0000";
+      if(this.isMe) return "#ff0000";
       return "#" + this.intToRGB(this.hashCode(str));
     },
+    /* eslint-disable */
     pickTextColorBasedOnBgColorSimple(bgColor) {
       var lightColor = '#FFFFFF';
       var darkColor = '#000000';
@@ -52,6 +122,7 @@ export default {
       return (((r * 0.299) + (g * 0.587) + (b * 0.114)) > 186) ?
         darkColor : lightColor;
     }
+    /* eslint-enable */
   }
 }
 </script>
