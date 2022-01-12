@@ -1,11 +1,13 @@
 <template>
   <div id="app">
-    <button @click="startGame">Start</button>
-    
     <div style="border: 1px solid #ccc; width: 500px; height: 500px;" @click="onMouseClick">
       <GameLost v-if="isGameLost" />
       <MainPlatform :players="players" :me="me"/>
     </div>
+
+    <button @click="startGame" v-if="isGameLost == false && isGameStarted == false">Start</button>
+    <button @click="restartGame" v-if="isGameLost">Restart</button>
+    
   </div>
 </template>
 
@@ -21,6 +23,7 @@ export default {
       time: 0,
       players: [],
       nearbyPlayers: [],
+      isGameStarted: false,
       isGameLost: false,
       me: {
         name: "You",
@@ -29,7 +32,8 @@ export default {
         nextX: null,
         nextY: null,
         isMe: true
-      }
+      },
+      tickTimeInterval: null
     };
   },
   components: {
@@ -55,8 +59,21 @@ export default {
       return {"id": id, "name": randomName, "x": x, "y": y, "nextX": nextX, "nextY": nextY, "isMe": false};
     },
     startGame(){
-      setInterval(() => this.tickTime(), 10);
+      this.tickTimeInterval = setInterval(() => this.tickTime(), 10);
+      this.isGameStarted = true;
       this.initiateMe();
+    },
+    restartGame() {
+      this.time = 0;
+      this.players = [];
+      this.nearbyPlayers = [];
+      this.isGameLost = false;
+      this.me.x = null;
+      this.me.y = null;
+      this.me.nextX = null;
+      this.me.nextY = null;
+
+      this.startGame();
     },
     initiateMe(){
       var x = this.getRandomInt(500);
@@ -128,6 +145,7 @@ export default {
 
       if(this.nearbyPlayers.length > 0){
         this.isGameLost = true;
+        clearInterval(this.tickTimeInterval);
       }
     },
     addRandomPlayer(){
