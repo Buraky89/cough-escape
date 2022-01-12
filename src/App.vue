@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <button @click="addRandomPlayer">Create</button>
-    <button @click="tickTime">Tick Time</button>
     
     <MainPlatform :players="players"/>
   </div>
@@ -27,15 +26,16 @@ export default {
       var id = ++this.max_id;
 
       if(id == 1){ // TODO: find a better solution to initiate interval
-        setInterval(() => this.tickTime(), 50)
+        setInterval(() => this.tickTime(), 10)
       }
 
       var randomName = this.$faker().name.firstName();
       var x = this.getRandomInt(500);
       var y = this.getRandomInt(500);
 
-      var nextX = this.getRandomInt(500);
-      var nextY = this.getRandomInt(500);
+      var nextLocation = this.decideNextLocation(x, y);
+      var nextX = nextLocation.x;
+      var nextY = nextLocation.y;
 
       return {"id": id, "name": randomName, "x": x, "y": y, "nextX": nextX, "nextY": nextY};
     },
@@ -46,28 +46,36 @@ export default {
       var xMovementDirection = Math.sign(singlePlayer.nextX - singlePlayer.x);
       var speed = 1;
 
-      var yDifference = speed * yMovementDirection;
-      var xDifference = speed * xMovementDirection * Math.abs(((singlePlayer.nextY - singlePlayer.y) / (singlePlayer.nextX - singlePlayer.x)));
+      var alpha = Math.atan(Math.abs((singlePlayer.nextX - singlePlayer.x) / (singlePlayer.nextY - singlePlayer.y)));
+      var yDifference = speed * yMovementDirection * Math.cos(alpha);
+      var xDifference = speed * xMovementDirection * Math.sin(alpha);
 
       singlePlayer.x = singlePlayer.x + xDifference;
       singlePlayer.y = singlePlayer.y + yDifference;
 
-      var playerIsCloseEnoughToTarget = false;
-      if(Math.abs(singlePlayer.x - singlePlayer.nextX) < 5){
-        playerIsCloseEnoughToTarget = true;
-      }
-      if(Math.abs(singlePlayer.y - singlePlayer.nextY) < 5){
-        playerIsCloseEnoughToTarget = true;
-      }
+      var howClose = Math.sqrt(Math.pow(singlePlayer.x - singlePlayer.nextX, 2) + Math.pow(singlePlayer.y - singlePlayer.nextY, 2));
+      var playerIsCloseEnoughToTarget = howClose < 4;
 
       if(playerIsCloseEnoughToTarget){
-        
-        var nextX = this.getRandomInt(500);
-        var nextY = this.getRandomInt(500);
+        var nextLocation = this.decideNextLocation(singlePlayer.x, singlePlayer.y);
+        var nextX = nextLocation.x;
+        var nextY = nextLocation.y;
 
         singlePlayer.nextX = nextX;
         singlePlayer.nextY = nextY;
       }
+    },
+    decideNextLocation(x, y){
+      var newPoint = this.generateRandomPoint(x, y, 100);
+      while(newPoint.x < 0 || newPoint.x >= 500 ||newPoint.y < 0 || newPoint.y >= 500){
+        console.log("randoming again...");
+        newPoint = this.generateRandomPoint(x, y, 100);
+      }
+      return {x: newPoint.x, y: newPoint.y};
+    },
+    generateRandomPoint(x, y, distance) {
+        var alpha = this.getRandomInt(360);
+        return {"x": (x + distance * Math.cos(alpha)), "y": (y + distance * Math.sin(alpha))}
     },
     tickTime(){
       this.time++;
