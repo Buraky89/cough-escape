@@ -8,7 +8,7 @@ export default {
   props: ['player'],
   computed: {
     getPlayerStyle() {
-      return "position: absolute; top: " + this.player.x.toString() + "px; left: " + this.player.y.toString() + "px; background-color: " + this.getPlayerBackgroundColor(this.player.name) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColor(this.player.name)) + ";";
+      return "position: absolute; top: " + this.getReadableLocationUnit(this.player.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.player.x.toString()) + "px; background-color: " + this.getPlayerBackgroundColor(this.player.name) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColor(this.player.name)) + ";";
     },
     
     getPlayerShortName() {
@@ -16,6 +16,14 @@ export default {
     }
   },
   methods: {
+    getReadableLocationUnit(u){
+      if(u.toString().indexOf(".") > 0){
+        return u.toString().substring(0, u.indexOf("."));
+      } else {
+        return u;
+      }
+      // TODO: cover weird types etc
+    },
     hashCode(str) {
         var hash = 0;
         for (var i = 0; i < str.length; i++) {

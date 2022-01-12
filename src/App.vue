@@ -24,7 +24,12 @@ export default {
   },
   methods: {
     createRandomPlayer() {
-      var id = ++this.max_id + 1;
+      var id = ++this.max_id;
+
+      if(id == 1){ // TODO: find a better solution to initiate interval
+        setInterval(() => this.tickTime(), 50)
+      }
+
       var randomName = this.$faker().name.firstName();
       var x = this.getRandomInt(500);
       var y = this.getRandomInt(500);
@@ -36,14 +41,33 @@ export default {
     },
     moveSinglePlayer(index){
       var singlePlayer = this.players[index];
-      singlePlayer.x = singlePlayer.nextX;
-      singlePlayer.y = singlePlayer.nextY;
       
-      var nextX = this.getRandomInt(500);
-      var nextY = this.getRandomInt(500);
-      
-      singlePlayer.nextX = nextX;
-      singlePlayer.nextY = nextY;
+      var yMovementDirection = Math.sign(singlePlayer.nextY - singlePlayer.y);
+      var xMovementDirection = Math.sign(singlePlayer.nextX - singlePlayer.x);
+      var speed = 1;
+
+      var yDifference = speed * yMovementDirection;
+      var xDifference = speed * xMovementDirection * Math.abs(((singlePlayer.nextY - singlePlayer.y) / (singlePlayer.nextX - singlePlayer.x)));
+
+      singlePlayer.x = singlePlayer.x + xDifference;
+      singlePlayer.y = singlePlayer.y + yDifference;
+
+      var playerIsCloseEnoughToTarget = false;
+      if(Math.abs(singlePlayer.x - singlePlayer.nextX) < 5){
+        playerIsCloseEnoughToTarget = true;
+      }
+      if(Math.abs(singlePlayer.y - singlePlayer.nextY) < 5){
+        playerIsCloseEnoughToTarget = true;
+      }
+
+      if(playerIsCloseEnoughToTarget){
+        
+        var nextX = this.getRandomInt(500);
+        var nextY = this.getRandomInt(500);
+
+        singlePlayer.nextX = nextX;
+        singlePlayer.nextY = nextY;
+      }
     },
     tickTime(){
       this.time++;
@@ -60,6 +84,7 @@ export default {
     }
   }
 }
+
 </script>
 
 <style>
