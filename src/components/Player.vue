@@ -126,7 +126,7 @@ export default {
     setProbableCoughing(){
       if(!this.isCoughing){
         var randomInt = this.getRandomInt(100000);
-        var coughProb = this.coughProbabilityPer100000 * 100;
+        var coughProb = this.coughProbabilityPer100000;
         var willCough = randomInt < (coughProb);
         if(willCough){
           this.isCoughing = true;
