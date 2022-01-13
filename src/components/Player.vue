@@ -1,11 +1,11 @@
 <template>
-  <div class="player" :class="getHasCoughingEffect" :key="id" :style="getPlayerStyle">{{ getPlayerShortName }}</div>
+  <div class="player" :class="getHasCoughingEffect" :key="id" :style="getPlayerStyle">{{ coughProbabilityPer100000 }}</div>
 </template>
 
 <script>
 export default {
   name: 'Player',
-  props: ['player', 'time', 'forcedX', 'forcedY', 'id'],
+  props: ['player', 'time', 'forcedX', 'forcedY', 'id', 'coughList'],
   data: function(){
     var p = this.initiatePlayer();
     console.log(p);
@@ -21,12 +21,17 @@ export default {
       coughingPeriod: {
         startTime: null,
         endTime: null
-      }
+      },
+      outsideCoughList: []
     };
   },
   watch: { 
     time: function() { // watch it
       this.setProbableCoughing();
+      this.processOutsideCoughs();
+    },
+    coughList: function(newValue){
+      this.outsideCoughList = newValue;
     }
   },
   computed: {
@@ -76,18 +81,31 @@ export default {
     }
   },
   methods: {
+    processOutsideCoughs() {
+      var unprocessedCoughs = this.outsideCoughList.filter(x => !x.isProcessed && x.id != this.id);
+      for(var i = 0; i < unprocessedCoughs.length; i++){
+        this.processSingleOutsideCough(unprocessedCoughs[i]);
+      }
+    },
+    processSingleOutsideCough(cough) {
+      var howClose = Math.sqrt(Math.pow(this.x - cough.x, 2) + Math.pow(this.y - cough.y, 2));
+      if(howClose < 50){
+        cough.isProcessed = true;
+        this.coughProbabilityPer100000 += cough.pointsToTransfer;
+      }
+    },
     setProbableCoughing(){
       if(!this.isCoughing){
         var randomInt = this.getRandomInt(100000);
         var coughProb = this.coughProbabilityPer100000;
-        var willCough = randomInt <= (coughProb);
+        var willCough = randomInt < (coughProb);
         if(willCough){
           this.isCoughing = true;
           this.coughingPeriod = {
             startTime: this.time,
-            endTime: this.time + 300
+            endTime: this.time + 30
           };
-          this.$emit('cough', {"id": this.id, "x": this.x, "y": this.y, "period": this.coughingPeriod });
+          this.$emit('cough', {"id": this.id, "x": this.x, "y": this.y, "period": this.coughingPeriod, "pointsToTransfer": this.coughProbabilityPer100000 });
         }
       } else {
         if(this.coughingPeriod.endTime < this.time){
@@ -150,10 +168,11 @@ export default {
       return "00000".substring(0, 6 - c.length) + c;
     },
     getPlayerBackgroundColor(str) {
-      if(this.isMe) return "#ffffff";
+      //if(this.isMe) return "#ffffff";
       return "#" + this.intToRGB(this.hashCode(str));
     },
     getPlayerBackgroundColorByProbability(degree){
+      if(degree > 10) degree = 10;
       return "#ff" + (255 - 20 * degree).toString(16) + (255 - 20 * degree).toString(16);
     },
     /* eslint-disable */
