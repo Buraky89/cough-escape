@@ -29,6 +29,7 @@ export default {
     time: function() { // watch it
       this.setProbableCoughing();
       this.processOutsideCoughs();
+      this.makePlayerDieIfTooSick();
     },
     coughList: function(newValue){
       this.outsideCoughList = newValue;
@@ -68,7 +69,7 @@ export default {
         ourMan.autoY = autoY;
       }
 
-      return "position: absolute; top: " + this.getReadableLocationUnit(this.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.x.toString()) + "px; background-color: " + /*this.getPlayerBackgroundColor(this.name)*/ this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColor(this.name)) + ";";
+      return "position: absolute; top: " + this.getReadableLocationUnit(this.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.x.toString()) + "px; background-color: " + /*this.getPlayerBackgroundColor(this.name)*/ this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000)) + ";";
     },
     getHasCoughingEffect() {
       if(this.isCoughing){
@@ -81,6 +82,23 @@ export default {
     }
   },
   methods: {
+    destroy () {
+      // destroy the vue listeners, etc
+      this.$destroy();
+
+      // remove the element from the DOM
+      this.$el.parentNode.removeChild(this.$el);
+    },
+    makePlayerDieIfTooSick(){
+      if(this.coughProbabilityPer100000 > 25){
+        this.$emit("playerDied", this.id)
+        if(this.id != -1) {
+          this.destroy();
+        } else {
+          Object.assign(this.$data, this.$options.data.call(this));
+        }
+      }
+    },
     processOutsideCoughs() {
       var unprocessedCoughs = this.outsideCoughList.filter(x => !x.isProcessed && x.id != this.id);
       for(var i = 0; i < unprocessedCoughs.length; i++){
@@ -97,7 +115,7 @@ export default {
     setProbableCoughing(){
       if(!this.isCoughing){
         var randomInt = this.getRandomInt(100000);
-        var coughProb = this.coughProbabilityPer100000;
+        var coughProb = this.coughProbabilityPer100000 * 100;
         var willCough = randomInt < (coughProb);
         if(willCough){
           this.isCoughing = true;
