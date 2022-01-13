@@ -1,5 +1,5 @@
 <template>
-  <div class="player" :key="id" :style="getPlayerStyle">{{ getPlayerShortName }}</div>
+  <div class="player" :class="getHasCoughingEffect" :key="id" :style="getPlayerStyle">{{ getPlayerShortName }}</div>
 </template>
 
 <script>
@@ -15,8 +15,19 @@ export default {
       y: p.y,
       autoX: p.autoX,
       autoY: p.autoY,
-      isMe: p.isMe
+      isMe: p.isMe,
+      isCoughing: false,
+      coughProbabilityPer100000: p.coughProbabilityPer100000,
+      coughingPeriod: {
+        startTime: null,
+        endTime: null
+      }
     };
+  },
+  watch: { 
+    time: function() { // watch it
+      this.setProbableCoughing();
+    }
   },
   computed: {
     getPlayerStyle() {
@@ -52,13 +63,43 @@ export default {
         ourMan.autoY = autoY;
       }
 
-      return "position: absolute; top: " + this.getReadableLocationUnit(this.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.x.toString()) + "px; background-color: " + this.getPlayerBackgroundColor(this.name) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColor(this.name)) + ";";
+      return "position: absolute; top: " + this.getReadableLocationUnit(this.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.x.toString()) + "px; background-color: " + /*this.getPlayerBackgroundColor(this.name)*/ this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColor(this.name)) + ";";
+    },
+    getHasCoughingEffect() {
+      if(this.isCoughing){
+        return "anim";
+      }
+      return "";
     },
     getPlayerShortName() {
       return this.name.substring(0, 3);
     }
   },
   methods: {
+    setProbableCoughing(){
+      if(!this.isCoughing){
+        var randomInt = this.getRandomInt(100000);
+        var coughProb = this.coughProbabilityPer100000;
+        var willCough = randomInt <= (coughProb);
+        if(willCough){
+          this.isCoughing = true;
+          this.coughingPeriod = {
+            startTime: this.time,
+            endTime: this.time + 300
+          };
+          this.$emit('cough', {"id": this.id, "x": this.x, "y": this.y, "period": this.coughingPeriod });
+        } else {
+        }
+      } else {
+        if(this.coughingPeriod.endTime < this.time){
+          this.isCoughing = false;
+          this.coughingPeriod = {
+            startTime: null,
+            endTime: null
+          };
+        }
+      }
+    },
     initiatePlayer() {
       var randomName = this.$faker().name.firstName();
       var x = this.getRandomInt(500);
@@ -68,12 +109,14 @@ export default {
       var autoX = nextLocation.x;
       var autoY = nextLocation.y;
 
-      return {"name": randomName, "x": x, "y": y, "autoX": autoX, "autoY": autoY, "isMe": this.id == -1};
+      var coughProbabilityPer100000 = this.getRandomInt(10);
+      if(this.id == -1) coughProbabilityPer100000 = 0;
+
+      return {"name": randomName, "x": x, "y": y, "autoX": autoX, "autoY": autoY, "isMe": this.id == -1, "coughProbabilityPer100000": coughProbabilityPer100000};
     },
     decideNextLocation(x, y){
       var newPoint = this.generateRandomPoint(x, y, 100);
       while(newPoint.x < 0 || newPoint.x >= 500 ||newPoint.y < 0 || newPoint.y >= 500){
-        console.log("randoming again...");
         newPoint = this.generateRandomPoint(x, y, 100);
       }
       return {x: newPoint.x, y: newPoint.y};
@@ -108,8 +151,11 @@ export default {
       return "00000".substring(0, 6 - c.length) + c;
     },
     getPlayerBackgroundColor(str) {
-      if(this.isMe) return "#ff0000";
+      if(this.isMe) return "#ffffff";
       return "#" + this.intToRGB(this.hashCode(str));
+    },
+    getPlayerBackgroundColorByProbability(degree){
+      return "#ff" + (255 - 20 * degree).toString(16) + (255 - 20 * degree).toString(16);
     },
     /* eslint-disable */
     pickTextColorBasedOnBgColorSimple(bgColor) {
@@ -139,5 +185,18 @@ export default {
   font-family: Verdana;
   font-size: 11px;
 }
+
+.player.anim {
+  background-clip: content-box;
+  animation: spin 10s linear infinite;
+  border: 4.5px dashed #CA0B00;
+}
+
+@keyframes spin { 
+  100% { 
+    transform: rotateZ(360deg);
+  }
+}
+
 
 </style>

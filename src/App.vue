@@ -2,7 +2,7 @@
   <div id="app">
     <div style="border: 1px solid #ccc; width: 500px; height: 500px;" @click="onMouseClick">
       <GameLost v-if="isGameLost" />
-      <MainPlatform :players="players" :time="time" :forcedX="forcedTarget.x" :forcedY="forcedTarget.y" />
+      <MainPlatform :players="players" :time="time" :forcedX="forcedTarget.x" :forcedY="forcedTarget.y" v-on:cough="onCough" />
     </div>
 
     <button @click="startGame" v-if="isGameLost == false && isGameStarted == false">Start</button>
@@ -35,6 +35,9 @@ export default {
     MainPlatform, GameLost
   },
   methods: {
+    onCough(details){
+      console.log("cough got from player. ", details.id, details.x, details.y, details.period);
+    },
     onMouseClick(e){
       this.forcedTarget = {"x": e.offsetX, "y": e.offsetY};
     },
