@@ -1,9 +1,7 @@
 <template>
-  <div>
-    <ul style="position: absolute;">
-      <Player v-for="p in players" :key="p.id" :time="time" :id="p.id" v-on:cough="onCough" :coughList="coughList" @playerDied="onPlayerDied"></Player>
-      <Player :id="-1" v-on:cough="onCough" :key="-1" :time="time" :forcedX="forcedX" :forcedY="forcedY" :coughList="coughList" @playerDied="onPlayerDied"></Player>
-    </ul>
+  <div style="border: 1px solid #ccc; width: 500px; height: 500px; position: absolute;" @click="onMouseClick">
+    <Player v-for="p in players" :key="p.id" :time="time" :id="p.id" v-on:cough="onCough" :coughList="coughList" @playerDied="onPlayerDied"></Player>
+    <Player :id="-1" v-on:cough="onCough" :key="-1" :time="time" :forcedX="forcedTarget.x" :forcedY="forcedTarget.y" :coughList="coughList" @playerDied="onPlayerDied"></Player>
   </div>
 </template>
 
@@ -12,13 +10,20 @@ import Player from './Player.vue';
 
 export default {
   name: 'MainPlatform',
-  props: ['players', 'forcedX', 'forcedY', 'time'],
+  props: ['players', 'time'],
   data: function(){
     return {
-      coughList: []
+      coughList: [],
+      forcedTarget: {
+        x: null,
+        y: null
+      }
     }
   },
   methods: {
+    onMouseClick(e){
+      this.forcedTarget = {"x": e.offsetX, "y": e.offsetY};
+    },
     onCough(details){
       this.$emit('cough', details);
 

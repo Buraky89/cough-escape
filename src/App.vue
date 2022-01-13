@@ -1,13 +1,11 @@
 <template>
   <div id="app">
-    <div style="border: 1px solid #ccc; width: 500px; height: 500px;" @click="onMouseClick">
+    <div class="game-container">
       <GameLost v-if="isGameLost" />
-      <MainPlatform :players="players" :time="time" :forcedX="forcedTarget.x" :forcedY="forcedTarget.y" v-on:gameLost="onGameLost" />
+      <MainPlatform :players="players" :time="time" v-on:gameLost="onGameLost" />
     </div>
-
     <button @click="startGame" v-if="isGameLost == false && isGameStarted == false">Start</button>
     <button @click="restartGame" v-if="isGameLost">Restart</button>
-    
   </div>
 </template>
 
@@ -24,10 +22,6 @@ export default {
       players: [],
       isGameStarted: false,
       isGameLost: false,
-      forcedTarget: {
-        x: null,
-        y: null
-      },
       tickTimeInterval: null
     };
   },
@@ -38,9 +32,6 @@ export default {
     onGameLost(){
       this.isGameLost = true;
       clearInterval(this.tickTimeInterval);
-    },
-    onMouseClick(e){
-      this.forcedTarget = {"x": e.offsetX, "y": e.offsetY};
     },
     startGame(){
       this.tickTimeInterval = setInterval(() => this.tickTime(), 10);
@@ -73,6 +64,7 @@ export default {
 
 </script>
 
-<style>
-
+<style scoped>
+  .game-container {display: block; height: 500px;}
+  button {display: block;}
 </style>
