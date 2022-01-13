@@ -33,7 +33,7 @@ export default {
       this.coughList.push(details);
     },
     onPlayerDied(id){
-      console.log("player died: ", id);
+      this.$emit('playerDied', id);
       if(id == -1){
         this.$emit('gameLost');
       }
