@@ -64,11 +64,6 @@ export default {
     },
     makePlayerDieIfTooSick(){
       if(this.coughProbabilityPer10000 > 25){
-        this.coughProbabilityPer10000 = 0;
-        this.x = 1000;
-        this.y = 1000;
-        this.targetX = 1005;
-        this.targetY = 1005;
         this.$emit("playerDied", this.id)
         if(this.id != -1) {
           Object.assign(this.$data, this.$options.data.call(this));
