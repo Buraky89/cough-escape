@@ -1,5 +1,5 @@
 <template>
-  <div class="player" :class="getHasCoughingEffect" :key="id" :style="getPlayerStyle">{{ coughProbabilityPer100000 }}</div>
+  <div class="player" :class="getAdditionalClasses" :key="id" :style="getPlayerStyle">{{ coughProbabilityPer100000 }}</div>
 </template>
 
 <script>
@@ -71,11 +71,15 @@ export default {
 
       return "position: absolute; top: " + this.getReadableLocationUnit(this.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.x.toString()) + "px; background-color: " + /*this.getPlayerBackgroundColor(this.name)*/ this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000)) + ";";
     },
-    getHasCoughingEffect() {
+    getAdditionalClasses(){
+      var classNames = []
       if(this.isCoughing){
-        return "anim";
+        classNames.push("anim");
       }
-      return "";
+      if(this.id == -1){
+        classNames.push("me");
+      }
+      return classNames.join(" ");
     },
     getPlayerShortName() {
       return this.name.substring(0, 3);
@@ -231,10 +235,14 @@ export default {
   font-size: 11px;
 }
 
+.player.me {
+  border: 1px dashed orange;
+}
+
 .player.anim {
   background-clip: content-box;
   animation: spin 10s linear infinite;
-  border: 4.5px dashed #CA0B00;
+  border: 4.5px dashed #CA0B00 !important;
 }
 
 @keyframes spin { 
