@@ -32,7 +32,7 @@ export default {
       this.makePlayerDieIfTooSick();
     },
     coughList: function(newValue){
-      this.outsideCoughList = newValue;
+      this.outsideCoughList.push(newValue[newValue.length - 1]);
     }
   },
   computed: {
@@ -91,8 +91,14 @@ export default {
     },
     makePlayerDieIfTooSick(){
       if(this.coughProbabilityPer100000 > 25){
+        this.coughProbabilityPer100000 = 0;
+        this.x = 1000;
+        this.y = 1000;
+        this.targetX = 1005;
+        this.targetY = 1005;
         this.$emit("playerDied", this.id)
         if(this.id != -1) {
+          Object.assign(this.$data, this.$options.data.call(this));
           this.destroy();
         } else {
           Object.assign(this.$data, this.$options.data.call(this));
@@ -100,7 +106,7 @@ export default {
       }
     },
     processOutsideCoughs() {
-      var unprocessedCoughs = this.outsideCoughList.filter(x => !x.isProcessed && x.id != this.id);
+      var unprocessedCoughs = this.outsideCoughList.filter(x => !x.isProcessed && x.id != this.id && x.period.startTime < this.time && this.time < x.period.endTime);
       for(var i = 0; i < unprocessedCoughs.length; i++){
         this.processSingleOutsideCough(unprocessedCoughs[i]);
       }
@@ -109,6 +115,9 @@ export default {
       var howClose = Math.sqrt(Math.pow(this.x - cough.x, 2) + Math.pow(this.y - cough.y, 2));
       if(howClose < 50){
         cough.isProcessed = true;
+        if(this.id != -1){
+          console.log(this.id, "caugh got from", cough.id, "and => ", cough.pointsToTransfer, "points");
+        }
         this.coughProbabilityPer100000 += cough.pointsToTransfer;
       }
     },
