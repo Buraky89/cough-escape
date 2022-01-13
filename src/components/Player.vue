@@ -148,8 +148,8 @@ export default {
     },
     initiatePlayer() {
       var randomName = this.$faker().name.firstName();
-      var x = this.getRandomInt(500);
-      var y = this.getRandomInt(500);
+      var x = this.getRandomInt(470);
+      var y = this.getRandomInt(470);
 
       var nextLocation = this.decideNextLocation(x, y);
       var autoX = nextLocation.x;
@@ -162,7 +162,7 @@ export default {
     },
     decideNextLocation(x, y){
       var newPoint = this.generateRandomPoint(x, y, 100);
-      while(newPoint.x < 0 || newPoint.x >= 500 ||newPoint.y < 0 || newPoint.y >= 500){
+      while(newPoint.x < 0 || newPoint.x >= 470 ||newPoint.y < 0 || newPoint.y >= 470){
         newPoint = this.generateRandomPoint(x, y, 100);
       }
       return {x: newPoint.x, y: newPoint.y};

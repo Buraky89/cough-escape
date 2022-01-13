@@ -14,6 +14,7 @@ export default {
   data: function(){
     return {
       coughList: [],
+      playerRadius: 15,
       forcedTarget: {
         x: null,
         y: null
@@ -22,7 +23,7 @@ export default {
   },
   methods: {
     onMouseClick(e){
-      this.forcedTarget = {"x": e.offsetX, "y": e.offsetY};
+      this.forcedTarget = this.getNormalizedLocation(e.offsetX, e.offsetY);
     },
     onCough(details){
       this.$emit('cough', details);
@@ -34,6 +35,15 @@ export default {
       if(id == -1){
         this.$emit('gameLost');
       }
+    },
+    getNormalizedLocation(x, y){
+      var newLocation = {"x": x - this.playerRadius, "y": y - this.playerRadius};
+      if(newLocation.x > 500 - this.playerRadius * 2) newLocation.x = 500 - this.playerRadius * 2;
+      if(newLocation.y > 500 - this.playerRadius * 2) newLocation.y = 500 - this.playerRadius * 2;
+      // TODO: allow 0 to be used as well
+      if(newLocation.x <= 0) newLocation.x = 1;
+      if(newLocation.y <= 0) newLocation.y = 1;
+      return newLocation;
     }
   },
   components: {
