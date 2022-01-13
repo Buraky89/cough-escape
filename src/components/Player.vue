@@ -1,5 +1,5 @@
 <template>
-  <div class="player" :class="getAdditionalClasses" :key="id" :style="getPlayerStyle">{{ coughProbabilityPer100000 }}</div>
+  <div class="player" :class="getAdditionalClasses" :key="id" :style="getPlayerStyle">{{ coughProbabilityPer10000 }}</div>
 </template>
 
 <script>
@@ -17,7 +17,7 @@ export default {
       autoY: p.autoY,
       isMe: p.isMe,
       isCoughing: false,
-      coughProbabilityPer100000: p.coughProbabilityPer100000,
+      coughProbabilityPer10000: p.coughProbabilityPer10000, // TODO: use a float number instead, and change this name to coughProbability.
       coughingPeriod: {
         startTime: null,
         endTime: null
@@ -38,7 +38,7 @@ export default {
   },
   computed: {
     getPlayerStyle() {
-      return "position: absolute; top: " + this.getReadableLocationUnit(this.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.x.toString()) + "px; background-color: " + /*this.getPlayerBackgroundColor(this.name)*/ this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000)) + ";";
+      return "position: absolute; top: " + this.getReadableLocationUnit(this.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.x.toString()) + "px; background-color: " + /*this.getPlayerBackgroundColor(this.name)*/ this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer10000) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer10000)) + ";";
     },
     getAdditionalClasses(){
       var classNames = []
@@ -63,8 +63,8 @@ export default {
       this.$el.parentNode.removeChild(this.$el);
     },
     makePlayerDieIfTooSick(){
-      if(this.coughProbabilityPer100000 > 25){
-        this.coughProbabilityPer100000 = 0;
+      if(this.coughProbabilityPer10000 > 25){
+        this.coughProbabilityPer10000 = 0;
         this.x = 1000;
         this.y = 1000;
         this.targetX = 1005;
@@ -88,10 +88,7 @@ export default {
       var howClose = Math.sqrt(Math.pow(this.x - cough.x, 2) + Math.pow(this.y - cough.y, 2));
       if(howClose < 50){
         cough.isProcessed = true;
-        if(this.id != -1){
-          console.log(this.id, "caugh got from", cough.id, "and => ", cough.pointsToTransfer, "points");
-        }
-        this.coughProbabilityPer100000 += cough.pointsToTransfer;
+        this.coughProbabilityPer10000 += cough.pointsToTransfer;
       }
     },
     makeMovement(){
@@ -125,8 +122,8 @@ export default {
     },
     setProbableCoughing(){
       if(!this.isCoughing){
-        var randomInt = this.getRandomInt(100000);
-        var coughProb = this.coughProbabilityPer100000;
+        var randomInt = this.getRandomInt(10000);
+        var coughProb = this.coughProbabilityPer10000;
         var willCough = randomInt < (coughProb);
         if(willCough){
           this.isCoughing = true;
@@ -134,7 +131,7 @@ export default {
             startTime: this.time,
             endTime: this.time + 30
           };
-          this.$emit('cough', {"id": this.id, "x": this.x, "y": this.y, "period": this.coughingPeriod, "pointsToTransfer": this.coughProbabilityPer100000 });
+          this.$emit('cough', {"id": this.id, "x": this.x, "y": this.y, "period": this.coughingPeriod, "pointsToTransfer": this.coughProbabilityPer10000 });
         }
       } else {
         if(this.coughingPeriod.endTime < this.time){
@@ -155,10 +152,10 @@ export default {
       var autoX = nextLocation.x;
       var autoY = nextLocation.y;
 
-      var coughProbabilityPer100000 = this.getRandomInt(10);
-      if(this.id == -1) coughProbabilityPer100000 = 0;
+      var coughProbabilityPer10000 = this.getRandomInt(10);
+      if(this.id == -1) coughProbabilityPer10000 = 0;
 
-      return {"name": randomName, "x": x, "y": y, "autoX": autoX, "autoY": autoY, "isMe": this.id == -1, "coughProbabilityPer100000": coughProbabilityPer100000};
+      return {"name": randomName, "x": x, "y": y, "autoX": autoX, "autoY": autoY, "isMe": this.id == -1, "coughProbabilityPer10000": coughProbabilityPer10000};
     },
     decideNextLocation(x, y){
       var newPoint = this.generateRandomPoint(x, y, 100);

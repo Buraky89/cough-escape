@@ -23,7 +23,9 @@ export default {
   },
   methods: {
     onMouseClick(e){
-      this.forcedTarget = this.getNormalizedLocation(e.offsetX, e.offsetY);
+      if(e.target.className != "player"){ // TODO: find a better way to refrain from clicks on other players
+        this.forcedTarget = this.getNormalizedLocation(e.offsetX, e.offsetY);
+      }
     },
     onCough(details){
       this.$emit('cough', details);
