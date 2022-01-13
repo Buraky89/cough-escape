@@ -88,7 +88,6 @@ export default {
             endTime: this.time + 300
           };
           this.$emit('cough', {"id": this.id, "x": this.x, "y": this.y, "period": this.coughingPeriod });
-        } else {
         }
       } else {
         if(this.coughingPeriod.endTime < this.time){
