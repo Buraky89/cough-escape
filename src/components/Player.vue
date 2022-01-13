@@ -27,6 +27,7 @@ export default {
   },
   watch: { 
     time: function() { // watch it
+      this.makeMovement(),
       this.setProbableCoughing();
       this.processOutsideCoughs();
       this.makePlayerDieIfTooSick();
@@ -37,38 +38,6 @@ export default {
   },
   computed: {
     getPlayerStyle() {
-      // eslint-disable-next-line no-unused-vars
-      var zeit = this.time;
-
-      var ourMan = this;
-
-
-      var targetX = this.forcedX ? this.forcedX : this.autoX;
-      var targetY = this.forcedY ? this.forcedY : this.autoY;
-
-      var yMovementDirection = Math.sign(targetY - ourMan.y);
-      var xMovementDirection = Math.sign(targetX - ourMan.x);
-      var speed = 1;
-
-      var alpha = Math.atan(Math.abs((targetX - ourMan.x) / (targetY - ourMan.y)));
-      var yDifference = speed * yMovementDirection * Math.cos(alpha);
-      var xDifference = speed * xMovementDirection * Math.sin(alpha);
-
-      ourMan.x = ourMan.x + xDifference;
-      ourMan.y = ourMan.y + yDifference;
-
-      var howClose = Math.sqrt(Math.pow(ourMan.x - targetX, 2) + Math.pow(ourMan.y - targetY, 2));
-      var playerIsCloseEnoughToTarget = howClose < 4;
-
-      if(playerIsCloseEnoughToTarget && !ourMan.isMe){
-        var nextLocation = this.decideNextLocation(ourMan.x, ourMan.y);
-        var autoX = nextLocation.x;
-        var autoY = nextLocation.y;
-
-        ourMan.autoX = autoX;
-        ourMan.autoY = autoY;
-      }
-
       return "position: absolute; top: " + this.getReadableLocationUnit(this.y.toString()) + "px; left: " + this.getReadableLocationUnit(this.x.toString()) + "px; background-color: " + /*this.getPlayerBackgroundColor(this.name)*/ this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000) + "; color: " + this.pickTextColorBasedOnBgColorSimple(this.getPlayerBackgroundColorByProbability(this.coughProbabilityPer100000)) + ";";
     },
     getAdditionalClasses(){
@@ -123,6 +92,35 @@ export default {
           console.log(this.id, "caugh got from", cough.id, "and => ", cough.pointsToTransfer, "points");
         }
         this.coughProbabilityPer100000 += cough.pointsToTransfer;
+      }
+    },
+    makeMovement(){
+      var targetX = this.forcedX ? this.forcedX : this.autoX;
+      var targetY = this.forcedY ? this.forcedY : this.autoY;
+
+      var yMovementDirection = Math.sign(targetY - this.y);
+      var xMovementDirection = Math.sign(targetX - this.x);
+      var speed = 1;
+
+      var alpha = Math.atan(Math.abs((targetX - this.x) / (targetY - this.y)));
+      var yDifference = speed * yMovementDirection * Math.cos(alpha);
+      var xDifference = speed * xMovementDirection * Math.sin(alpha);
+
+      var howClose = Math.sqrt(Math.pow(this.x - targetX, 2) + Math.pow(this.y - targetY, 2));
+      var playerIsCloseEnoughToTarget = howClose < 4;
+
+      if(playerIsCloseEnoughToTarget && !this.isMe){
+        var nextLocation = this.decideNextLocation(this.x, this.y);
+        var autoXnew = nextLocation.x;
+        var autoYnew = nextLocation.y;
+
+        this.autoX = autoXnew;
+        this.autoY = autoYnew;
+      } else {
+        if(!(this.isMe  && playerIsCloseEnoughToTarget)){
+          this.x = this.x + xDifference;
+          this.y = this.y + yDifference;
+        }
       }
     },
     setProbableCoughing(){
